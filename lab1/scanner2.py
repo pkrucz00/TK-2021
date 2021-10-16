@@ -1,4 +1,5 @@
 import ply.lex as lex
+import sys
 reserved = {
     'if': 'IF',
     'else': 'ELSE',
@@ -12,14 +13,7 @@ reserved = {
     'print': 'PRINT'
 }
 
-tokens = (
-          'DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV',
-          'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN',
-          'LE', 'GE', 'NEQ', 'EQ',
-          'ID',
-          'INT',
-          'FLOAT',
-          'STRING') + list(reserved.values())
+tokens = ('DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV','ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN','LE', 'GE', 'NEQ', 'EQ','ID','INT','FLOAT','STRING')# + list(reserved.values())
 
 
 
@@ -43,7 +37,6 @@ t_EQ = r'=='
 t_ignore = ' \t'
 t_ignore_COMMENT = r'\#.*'
 
-#TUTAJ ZNALEZIONE https://titanwolf.org/Network/Articles/Article?AID=0c88c627-a452-4d9b-8a7b-af6d83e71969#gsc.tab=0
 
 def t_ID(t):
     r"[a-zA-Z_]\w*"
@@ -55,6 +48,26 @@ def t_INT(t):
     t.value = int(t.value)
     return t
 
+def t_FLOAT(t):
+    r'((\.\d+)|(\d+\.\d*))([eE][+-]?\d+)?'
+    t.value = float(t.value)
+    return t
+
+def t_STRING(t):
+    r'"([^"]+|\\"|\\\\)*"'
+    return t
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+
+def t_error(t):
+     print("Illegal character '%s'" % t.value[0])
+     t.lexer.skip(1)
+
+def find_column(input, token):
+     line_start = input.rfind('\n', 0, token.lexpos) + 1
+     return (token.lexpos - line_start) + 1
+
+lexer = lex.lex()
+
