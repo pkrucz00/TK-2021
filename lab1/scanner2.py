@@ -1,5 +1,6 @@
 import ply.lex as lex
 import sys
+
 reserved = {
     'if': 'IF',
     'else': 'ELSE',
@@ -13,9 +14,8 @@ reserved = {
     'print': 'PRINT'
 }
 
-tokens = ('DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV','ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN','LE', 'GE', 'NEQ', 'EQ','ID','INT','FLOAT','STRING')# + list(reserved.values())
-
-
+tokens = ['DOTADD', 'DOTSUB', 'DOTMUL', 'DOTDIV', 'ADDASSIGN', 'SUBASSIGN', 'MULASSIGN', 'DIVASSIGN', 'LE', 'GE', 'NEQ',
+          'EQ', 'ID', 'INT', 'FLOAT', 'STRING'] + list(reserved.values())
 
 literals = "+-*/=<>()[]{}:',;"
 
@@ -43,31 +43,37 @@ def t_ID(t):
     t.type = reserved.get(t.value, 'ID')
     return t
 
+
 def t_INT(t):
     r'\d+'
     t.value = int(t.value)
     return t
+
 
 def t_FLOAT(t):
     r'((\.\d+)|(\d+\.\d*))([eE][+-]?\d+)?'
     t.value = float(t.value)
     return t
 
+
 def t_STRING(t):
     r'"([^"]+|\\"|\\\\)*"'
     return t
+
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
+
 def t_error(t):
-     print("Illegal character '%s'" % t.value[0])
-     t.lexer.skip(1)
+    print("Illegal character '%s'" % t.value[0])
+    t.lexer.skip(1)
+
 
 def find_column(input, token):
-     line_start = input.rfind('\n', 0, token.lexpos) + 1
-     return (token.lexpos - line_start) + 1
+    line_start = input.rfind('\n', 0, token.lexpos) + 1
+    return (token.lexpos - line_start) + 1
+
 
 lexer = lex.lex()
-
