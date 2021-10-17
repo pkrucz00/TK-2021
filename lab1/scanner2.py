@@ -77,3 +77,13 @@ def find_column(input, token):
 
 
 lexer = lex.lex()
+
+
+if __name__ == '__main__':
+    filename = 'example.txt'
+    with open(filename) as file:
+            text = file.read()
+
+    lexer.input(text)
+    for token in lexer:
+        print('(%d): %s(%s)' % (token.lineno, token.type, token.value))
