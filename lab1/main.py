@@ -1,6 +1,6 @@
 import sys
 import ply.lex as lex
-import scanner  # scanner.py is a file you create, (it is not an external library)
+import scanner # scanner.py is a file you create, (it is not an external library)
 
 
 if __name__ == '__main__':
@@ -13,7 +13,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     text = file.read()
-    lexer = scanner.lexer
+    lexer = scanner.lexer()  # Changed to function call
     lexer.input(text) # Give the lexer some input
 
     # Tokenize
