@@ -36,9 +36,18 @@ def p_instructions_1(p):
 
 
 def p_instructions_2(p):
-    """instructions : instruction """
+    """instructions : instruction"""
 
 
+def p_instruction(p):
+    """instruction : statement ";" """
+
+
+def p_statement(p):
+    """statement : assignment
+                  | loop_statement
+                  | if_statement
+                  | """
 # to finish the grammar
 # ....
 

@@ -59,7 +59,7 @@ def t_FLOAT(t):
 
 
 def t_STRING(t):
-    r'".*"'
+    r'".*?"'
     return t
 
 
