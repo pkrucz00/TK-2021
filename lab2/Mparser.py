@@ -83,10 +83,22 @@ def p_statement(p):
 
 def p_assignment(p):
     """ assignment : variable "=" expression
+                   | variable "=" matrix_function
                    | variable ADDASSIGN expression
                    | variable SUBASSIGN expression
                    | variable MULASSIGN expression
                    | variable DIVASSIGN expression"""
+
+
+def p_matrix_function(p):
+    """ matrix_function : matrix_function_name "(" INT ")" """
+
+
+def p_matrix_function_name(p):
+    """ matrix_function_name : ZEROS
+                            | ONES
+                            | EYE """
+
 
 def p_variable(p):
     """ variable : ID
@@ -115,6 +127,8 @@ def p_expression(p):
                    | expression DOTSUB expression
                    | expression DOTMUL expression
                    | expression DOTDIV expression
+                   | expression "'"
+                   | "-" expression
                    | "(" expression ")"
                    | number"""
 
