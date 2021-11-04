@@ -4,6 +4,7 @@ reserved = {
     'if': 'IF',
     'else': 'ELSE',
     'while': 'WHILE',
+    'for': 'FOR',
     'break': 'BREAK',
     'continue': 'CONTINUE',
     'return': 'RETURN',

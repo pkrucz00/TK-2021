@@ -5,12 +5,16 @@ import ply.yacc as yacc
 
 tokens = scanner.tokens
 
-start = program
+start = 'program'
 
 precedence = (
-    # to fill ...
-    ("left", '+', '-'),
-    # to fill ...
+    ("nonassoc", 'IFX'),
+    ("nonassoc", 'ELSE'),
+    ("nonassoc", '='),
+    ("nonassoc", 'ADDASSIGN', 'SUBASSIGN'),
+    ("nonassoc", 'MULASSIGN', 'DIVASSIGN'),
+    ("left", '+', '-', 'DOTADD', 'DOTSUB'),
+    ("left", '*', '/', 'DOTMUL', "DOTDIV")
 )
 
 
@@ -35,62 +39,106 @@ def p_instructions_opt_2(p):
 
 def p_instructions(p):
     """instructions : instructions instruction
-                    | instruction block
                     | instruction
-                    | block"""
+                    | "{" instructions "}" """
 
 
 def p_instruction(p):
     """instruction : statement ";" """
 
 
-def p_block(p):
-    """block: "{" instructions_opt "}" """
+def p_instruction_if(p):
+    """ instruction : IF '(' condition ')' instructions %prec IFX """
+
+
+def p_instruction_if_else(p):
+    """ instruction : IF '(' condition ')' instructions ELSE instructions """
+
+
+def p_instruction_for(p):
+    """ instruction : FOR ID '=' range instructions """
+
+
+def p_instruction_while(p):
+    """ instruction : WHILE '(' condition ')' instructions """
+
+
+def p_range(p):
+    """ range : expression ':' expression """
+
+
+def p_condition(p):
+    """ condition : expression EQ expression
+                  | expression NEQ expression
+                  | expression LE expression
+                  | expression GE expression
+                  | expression '<' expression
+                  | expression '>' expression """
 
 
 def p_statement(p):
     """statement : assignment
-                  | loop_statement
-                  | if_statement
                   | print_statement"""
 
 
 def p_assignment(p):
-    """ assignment: variable "=" expression
-                  | variable ADDASSIGN expression
-                  | variable SUBASSIGN expression
-                  | variable MULASSIGN expression
-                  | variable DIVASSIGN expression"""
-
+    """ assignment : variable "=" expression
+                   | variable ADDASSIGN expression
+                   | variable SUBASSIGN expression
+                   | variable MULASSIGN expression
+                   | variable DIVASSIGN expression"""
 
 def p_variable(p):
-    """ variable: ID
+    """ variable : ID
                 | element"""
 
 
 def p_element(p):
-    """ element: vector_element
+    """ element : vector_element
                | matrix_element"""
 
 
 def p_vector_element(p):
-    # możemy przedyskutować, czy potrzebny jest podział na "vector" i "matrix",
-    # czy może "matrix" to po prostu wiele obiektów typu "vector"
-    """ vector_element: ID "[" INT "]" """
+    """ vector_element : ID "[" INT "]" """
 
 
 def p_matrix_element(p):
-    """ matrix_element: ID "[" INT "," INT "]" """
+    """ matrix_element : ID "[" INT "," INT "]" """
 
 
 def p_expression(p):
-    """ expression: math_expression
-                   | matrix_expression
-                   | matrix_function"""
+    """ expression : expression '+' expression
+                   | expression '-' expression
+                   | expression '*' expression
+                   | expression '/' expression
+                   | expression DOTADD expression
+                   | expression DOTSUB expression
+                   | expression DOTMUL expression
+                   | expression DOTDIV expression
+                   | "(" expression ")"
+                   | number"""
+
+def p_number(p):
+    """ number : INT
+               | FLOAT """
 
 
 def p_print_statement(p):
-    """ print_statement: PRINT STRING"""
+    """ print_statement : PRINT STRING
+                       | PRINT variable"""
+
+
+def p_break_statement(p):
+    """ statement : BREAK """
+
+
+def p_continue_statement(p):
+    """ statement : CONTINUE """
+
+
+def p_return_statement(p):
+    """ statement : RETURN """
+
 
 parser = yacc.yacc()
 
