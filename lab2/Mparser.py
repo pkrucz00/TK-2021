@@ -89,6 +89,7 @@ def p_statement(p):
 def p_assignment(p):
     """ assignment : variable "=" expression
                    | variable "=" matrix_function
+                   | variable "=" matrix
                    | variable ADDASSIGN expression
                    | variable SUBASSIGN expression
                    | variable MULASSIGN expression
@@ -101,8 +102,26 @@ def p_matrix_function(p):
 
 def p_matrix_function_name(p):
     """ matrix_function_name : ZEROS
-                            | ONES
-                            | EYE """
+                             | ONES
+                             | EYE """
+
+
+def p_matrix(p):
+    """ matrix : "[" vectors "]" """
+
+
+def p_vectors(p):
+    """ vectors : vectors "," vector
+                | vector """
+
+
+def p_vector(p):
+    """ vector : "[" variables "]" """
+
+
+def p_variables(p):
+    """ variables : variables "," variable
+                  | variable """
 
 
 def p_variable(p):
