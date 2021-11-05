@@ -11,6 +11,8 @@ precedence = (
     ("nonassoc", 'IFX'),
     ("nonassoc", 'ELSE'),
     ("nonassoc", '='),
+    ("nonassoc", "INT"),
+    ("nonassoc", "FLOAT"),
     ("nonassoc", 'ADDASSIGN', 'SUBASSIGN'),
     ("nonassoc", 'MULASSIGN', 'DIVASSIGN'),
     ("left", '+', '-', 'DOTADD', 'DOTSUB'),
@@ -24,6 +26,9 @@ def p_error(p):
     else:
         print("Unexpected end of input")
 
+def p_empty(p):
+    """ empty :"""
+
 
 def p_program(p):
     """program : instructions_opt"""
@@ -34,7 +39,7 @@ def p_instructions_opt_1(p):
 
 
 def p_instructions_opt_2(p):
-    """instructions_opt : """
+    """instructions_opt : empty"""
 
 
 def p_instructions(p):
@@ -102,7 +107,8 @@ def p_matrix_function_name(p):
 
 def p_variable(p):
     """ variable : ID
-                | element"""
+                 | element
+                 | number """
 
 
 def p_element(p):
@@ -130,7 +136,8 @@ def p_expression(p):
                    | expression "'"
                    | "-" expression
                    | "(" expression ")"
-                   | number"""
+                   | variable """
+
 
 def p_number(p):
     """ number : INT
@@ -138,8 +145,17 @@ def p_number(p):
 
 
 def p_print_statement(p):
-    """ print_statement : PRINT STRING
-                       | PRINT variable"""
+    """ print_statement : PRINT printables """
+
+
+def p_printables(p):
+    """ printables : printables "," printable
+                   | printable """
+
+
+def p_printable(p):
+    """ printable : STRING
+                  | variable """
 
 
 def p_break_statement(p):
@@ -151,7 +167,7 @@ def p_continue_statement(p):
 
 
 def p_return_statement(p):
-    """ statement : RETURN """
+    """ statement : RETURN variable """
 
 
 parser = yacc.yacc()

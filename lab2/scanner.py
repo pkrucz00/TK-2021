@@ -41,21 +41,22 @@ t_EQ = r'=='
 t_ignore = ' \t'
 t_ignore_COMMENT = r'\#.*'
 
+
 def t_ID(t):
     r'[a-zA-Z_]\w*'
     t.type = reserved.get(t.value, 'ID')
     return t
 
 
-def t_INT(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
-
-
 def t_FLOAT(t):
     r'((\.\d+)|(\d+\.\d*))([eE][+-]?\d+)?'
     t.value = float(t.value)
+    return t
+
+
+def t_INT(t):
+    r'\d+'
+    t.value = int(t.value)
     return t
 
 
