@@ -46,7 +46,7 @@ def p_instructions(p):
 
 def p_instruction(p):
     """instruction : assignment ';'
-                | statement
+                | statement ';'
                 | '{' instructions '}'
                 """
 
@@ -189,19 +189,19 @@ def p_transposition(p):
 
 
 def p_break_statement(p):
-    """statement : BREAK ';'"""
+    """statement : BREAK"""
 
 
 def p_continue_statement(p):
-    """statement : CONTINUE ';'"""
+    """statement : CONTINUE"""
 
 
 def p_return_statement(p):
-    """statement : RETURN expression ';'"""
+    """statement : RETURN expression """
 
 
 def p_print_statement(p):
-    """statement : PRINT print_vals ';'"""
+    """statement : PRINT print_vals """
 
 
 def p_print_vals(p):
