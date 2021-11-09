@@ -64,7 +64,7 @@ def p_instruction_while(p):
 
 
 def p_instruction_for(p):
-    """instruction : FOR var '=' range instruction """
+    """instruction : FOR ID '=' range instruction """
 
 
 def p_range(p):
@@ -89,7 +89,7 @@ def p_assignment_op(p):
 
 
 def p_assignment(p):
-    """assignment : var assignment_op expression
+    """assignment : ID assignment_op expression
                 | matrix_element assignment_op expression
                 | vector_element assignment_op expression """
 
@@ -124,7 +124,7 @@ def p_variables(p):
 
 def p_variable(p):
     """variable : number
-                 | var
+                 | ID
                  | element """
 
 
@@ -139,10 +139,6 @@ def p_vector_element(p):
 
 def p_matrix_element(p):
     """ matrix_element : ID "[" INT "," INT "]" """
-
-
-def p_var(p):
-    """var : ID """
 
 
 def p_number(p):
@@ -177,7 +173,7 @@ def p_expression(p):
 
 def p_num_expression(p):
     """num_expression : number
-                      | var """
+                      | ID """
 
 
 def p_uminus(p):
