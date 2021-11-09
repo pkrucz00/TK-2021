@@ -6,8 +6,8 @@ start = 'program'
 precedence = (
     ('nonassoc', 'IFX'),
     ('nonassoc', 'ELSE'),
-    ('right', 'MULASSIGN', 'DIVASSIGN', 'SUBASSIGN', 'ADDASSIGN'),
     ('nonassoc', '<', '>', 'GE', 'LE', 'EQ', 'NEQ'),
+    ('right', 'MULASSIGN', 'DIVASSIGN', 'SUBASSIGN', 'ADDASSIGN'),
     ('left', '+', '-'),
     ('left', 'DOTADD', 'DOTSUB'),
     ('left', '*', '/'),
