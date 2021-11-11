@@ -47,7 +47,7 @@ class If(Node):
         self.instruction = instruction
 
 
-class If_else(Node):
+class IfElse(Node):
     def __init__(self, condition, instruction, else_instruction):
         self.condition = condition
         self.instruction = instruction
@@ -61,9 +61,17 @@ class BinExpr(Node):
         self.right = right
 
 
-# ...
-# fill out missing classes
-# ...
+class AssignOperation(Node):
+    def __init__(self, variable, op, expression):
+        self.variable = variable
+        self.op = op
+        self.expression = expression
+
+
+class Print(Node):
+    def __init__(self, print_vars):
+        self.print_vars = print_vars
+
 
 class Error(Node):
     def __init__(self):

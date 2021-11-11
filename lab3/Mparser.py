@@ -1,5 +1,6 @@
 import ply.yacc as yacc
 import scanner
+import AST
 tokens = scanner.tokens
 
 start = 'program'
@@ -198,7 +199,7 @@ def p_return_statement(p):
 
 def p_print_statement(p):
     """statement : PRINT print_vals """
-
+    p[0] = AST.Print(p[2])
 
 def p_print_vals(p):
     """print_vals : print_vals ',' print_val
