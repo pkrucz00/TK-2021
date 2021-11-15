@@ -2,6 +2,73 @@ class Node(object):
     pass
 
 
+class BinExpr(Node):
+    def __init__(self, bin_op, left, right):
+        self.bin_op = bin_op
+        self.left = left
+        self.right = right
+
+
+class Cond(Node):
+    def __init__(self, rel_op, left, right):
+        self.rel_op = rel_op
+        self.left = left
+        self.right = right
+
+
+class AssignOperation(Node):
+    def __init__(self, variable, op, expression):
+        self.variable = variable
+        self.op = op
+        self.expression = expression
+
+
+class If(Node):
+    def __init__(self, condition, instruction):
+        self.condition = condition
+        self.instruction = instruction
+
+
+class IfElse(Node):
+    def __init__(self, condition, instruction, else_instruction):
+        self.condition = condition
+        self.instruction = instruction
+        self.else_instruction = else_instruction
+
+
+class While(Node):
+    def __init__(self, condition, instruction):
+        self.condition = condition
+        self.instruction = instruction
+
+
+class For(Node):
+    def __init__(self, l_id, f_range, instruction):
+        self.l_id = l_id
+        self.f_range = f_range
+        self.instruction = instruction
+
+
+class Break(Node):
+    def __init__(self):
+        pass
+
+
+class Continue(Node):
+    def __init__(self):
+        pass
+
+
+class Return(Node):
+    def __init__(self, val):
+        self.val = val
+
+
+class Print(Node):
+    def __init__(self, print_vars):
+        self.print_vars = print_vars
+
+
 class IntNum(Node):
     def __init__(self, value):
         self.value = value
@@ -28,49 +95,24 @@ class Range(Node):
         self.end = end
 
 
-class While(Node):
-    def __init__(self, condition, instruction):
-        self.condition = condition
-        self.instruction = instruction
+class Zeros(Node):
+    def __init__(self, val):
+        self.val = val
 
 
-class For(Node):
-    def __init__(self, l_id, f_range, instruction):
-        self.l_id = l_id
-        self.f_range = f_range
-        self.instruction = instruction
+class Eye(Node):
+    def __init__(self, val):
+        self.val = val
 
 
-class If(Node):
-    def __init__(self, condition, instruction):
-        self.condition = condition
-        self.instruction = instruction
+class Ones(Node):
+    def __init__(self, val):
+        self.val = val
 
 
-class IfElse(Node):
-    def __init__(self, condition, instruction, else_instruction):
-        self.condition = condition
-        self.instruction = instruction
-        self.else_instruction = else_instruction
-
-
-class BinExpr(Node):
-    def __init__(self, op, left, right):
-        self.op = op
-        self.left = left
-        self.right = right
-
-
-class AssignOperation(Node):
-    def __init__(self, variable, op, expression):
-        self.variable = variable
-        self.op = op
-        self.expression = expression
-
-
-class Print(Node):
-    def __init__(self, print_vars):
-        self.print_vars = print_vars
+class Transposition(Node):
+    def __init__(self, matrix):
+        self.matrix = matrix
 
 
 class Error(Node):

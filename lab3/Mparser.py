@@ -201,10 +201,11 @@ def p_print_statement(p):
     """statement : PRINT print_vals """
     p[0] = AST.Print(p[2])
 
+
 def p_print_vals(p):
     """print_vals : print_vals ',' print_val
                   | print_val """
-
+    if
 
 def p_print_val(p):
     """print_val : string
