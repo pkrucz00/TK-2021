@@ -131,7 +131,6 @@ class TreePrinter:
     @addToClass(AST.Transposition)
     def printTree(self, indent=0):
         print(TreePrinter.make_indent(indent) + 'TRANSPOSE')
-        #for el in self.matrix:
         self.matrix.printTree(indent + 1)
 
     @addToClass(AST.Uminus)

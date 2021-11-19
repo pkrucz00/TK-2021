@@ -259,7 +259,7 @@ def p_print_vals(p):
 def p_print_val(p):
     """print_val : string
                  | expression"""
-    p[0] = p[1]   #jestem mocno niepewny, czy to jest odpowiednia konstrukcja XD
+    p[0] = p[1]
 
 
 parser = yacc.yacc()
