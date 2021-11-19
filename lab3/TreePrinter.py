@@ -1,5 +1,6 @@
 import AST
 
+
 def addToClass(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
@@ -7,8 +8,8 @@ def addToClass(cls):
 
     return decorator
 
-class TreePrinter:
 
+class TreePrinter:
     @classmethod
     def make_indent(self, indent):
         return ''.join('| ' * indent)
@@ -101,9 +102,8 @@ class TreePrinter:
 
     @addToClass(AST.PrintVals)
     def printTree(self, indent=0):
-        print(TreePrinter.make_indent(indent) + 'PRINT VALS')
         for el in self.vals:
-            el.printTree(indent + 1)
+            el.printTree(indent)
 
     @addToClass(AST.Num)
     def printTree(self, indent=0):
@@ -152,8 +152,8 @@ class TreePrinter:
     def printTree(self, indent=0):
         print(TreePrinter.make_indent(indent) + "MATRIX ELEMENT")
         self.id.printTree(indent + 1)
-        print(TreePrinter.make_indent(indent) + str(self.index_x))
-        print(TreePrinter.make_indent(indent) + str(self.index_y))
+        print(TreePrinter.make_indent(indent + 1) + str(self.index_x))
+        print(TreePrinter.make_indent(indent + 1) + str(self.index_y))
 
     @addToClass(AST.Error)
     def printTree(self, indent=0):
