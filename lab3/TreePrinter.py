@@ -125,7 +125,8 @@ class TreePrinter:
 
     @addToClass(AST.MatrixFunction)
     def printTree(self, indent=0):
-        print(TreePrinter.make_indent(indent) + self.func + str(self.value))
+        print(TreePrinter.make_indent(indent) + self.func)
+        print(TreePrinter.make_indent(indent+1)+ str(self.value))
 
     @addToClass(AST.Transposition)
     def printTree(self, indent=0):
