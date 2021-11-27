@@ -1,6 +1,5 @@
 /organizacyjne.txt
 /venv/
-/lab3/parser.out
-/lab3/parsetab.py
-/lab4/parser.out
-/lab4/parsetab.py
+*/parser.out
+*/parsetab.py
+*/__pycache__/*

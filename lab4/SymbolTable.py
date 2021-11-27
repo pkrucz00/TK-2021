@@ -4,7 +4,6 @@ class Symbol:
 
 
 class VariableSymbol(Symbol):
-
     def __init__(self, name, type):
         self.name = name
         self.type = type
@@ -16,23 +15,14 @@ class SymbolTable(object):
         self.name = name
         self.var_dict = {}
 
-    #
-
     def put(self, name, symbol):  # put variable symbol or fundef under <name> entry
         self.var_dict[name] = symbol
 
-    #
-
     def get(self, name):  # get variable symbol or fundef from <name> entry
-        try:
-            return self.var_dict[name]
-        except KeyError:
-            if self.parent is None:
-                return None
-            else:
-                return self.getParentScope().get(name)
+        return self.var_dict.get(name, default=self.__get_default_value())
 
-    #
+    def __get_default_value(self):
+        return self.getParentScope().get(name) if self.parent is not None else None
 
     def getParentScope(self):
         return self.parent

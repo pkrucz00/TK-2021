@@ -89,23 +89,14 @@ class Vector(Node):
 
 class PrintVals(Node):
     def __init__(self, new_val, vals=None):
-        self.vals = vals.vals.copy() if vals else []   #TODO sprawdzić, czy program wywala sie, kiedy nie kopiujemy
+        self.vals = vals.vals.copy() if vals else []
         self.vals.append(new_val)
 
 
-class Num(Node):           # ta klasa powinna zastąpić 2 (poniżej zakomentowane) klasy
+class Num(Node):
     def __init__(self, value):
         self.value = value
 
-# class IntNum(Node):
-#     def __init__(self, value):
-#         self.value = value
-#
-#
-# class FloatNum(Node):
-#     def __init__(self, value):
-#         self.value = value
-#
 
 class String(Node):
     def __init__(self, value):
@@ -160,6 +151,7 @@ class MatrixElement(Node):
 class Error(Node):
     def __init__(self):
         pass
+
 
 class Empty(Node):
     def __init__(self):

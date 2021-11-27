@@ -69,6 +69,7 @@ def p_instruction_if(p):
     """instruction : IF '(' condition ')' instruction %prec IFX """
     p[0] = AST.If(p[3], p[5])
 
+
 def p_instruction_if_else(p):
     """instruction : IF '(' condition ')' instruction ELSE instruction """
     p[0] = AST.IfElse(p[3], p[5], p[7])
@@ -77,6 +78,7 @@ def p_instruction_if_else(p):
 def p_instruction_while(p):
     """instruction : WHILE '(' condition ')' instruction """
     p[0] = AST.WhileLoop(p[3], p[5])
+
 
 def p_instruction_for(p):
     """instruction : FOR var '=' range instruction """
@@ -212,7 +214,7 @@ def p_num_expression(p):
     p[0] = p[1]
 
 
-def p_var(p):   #var wrócił! Uprościło to w paru miejscach składnię - okazuje się, że w jednej funkcji lepiej nie mieszać terminali i nieterminali
+def p_var(p):
     """ var : ID """
     p[0] = AST.ID(p[1])
 
