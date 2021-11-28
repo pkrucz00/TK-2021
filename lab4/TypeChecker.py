@@ -1,6 +1,39 @@
 #!/usr/bin/python
 
-from SymbolTable import SymbolTable
+from SymbolTable import SymbolTable, VectorType
+import AST
+from collections import defaultdict
+
+ttype = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: None)))
+
+for op in ['<', '>', '>=', '<=', '==', '!=']:
+    ttype[op]['int']['int'] = 'int'
+    ttype[op]['float']['float'] = 'float'
+    ttype[op]['int']['float'] = 'float'
+    ttype[op]['float']['int'] = 'float'
+
+
+for op in ['+', '-', '*', '/', '+=', '-=', '*=', '/=']:
+    ttype[op]['int']['int'] = 'int'
+    ttype[op]['float']['float'] = 'float'
+    ttype[op]['int']['float'] = 'float'
+    ttype[op]['float']['int'] = 'float'
+    ttype[op]['vector']['vector'] = 'vector'
+
+
+for op in ['.+', '.-', '.*', './']:
+    ttype[op]['vector']['vector'] = 'vector'
+    ttype[op]['vector']['int'] = 'vector'
+    ttype[op]['vector']['float'] = 'vector'
+    ttype[op]['int']['vector'] = 'vector'
+    ttype[op]['float']['vector'] = 'vector'
+
+
+ttype['\'']['vector'][None] = 'vector'
+ttype['-']['vector'][None] = 'vector'
+ttype['-']['int'][None] = 'int'
+ttype['-']['float'][None] = 'float'
+ttype['+']['string']['string'] = 'string'
 
 
 class NodeVisitor(object):
@@ -35,11 +68,11 @@ class Error:
 
 class TypeChecker(NodeVisitor):
     def __init__(self):
-        self.symbol_table = None
+        self.symbol_table = SymbolTable(None, 'main')
         self.errors = None
 
     def init_visit(self):
-        self.symbol_table = SymbolTable()
+        self.symbol_table = SymbolTable(None, 'main')
         self.errors = []
 
     def print_errors(self):
@@ -55,9 +88,26 @@ class TypeChecker(NodeVisitor):
     def visit_BinExpr(self, node):
         type_left = self.visit(node.left)
         type_right = self.visit(node.right)
-        op = node.op
-        # type check
-        # return bin_expr_type  TODO fill when ttype is added
+        op = node.bin_op
+
+        if isinstance(type_left, Error) or isinstance(type_right, Error):
+            return Error()
+
+        type = ttype[op][str(type_left)][str(type_right)]
+        if type is not None:
+            if type == 'vector':
+                if isinstance(type_left, VectorType) and isinstance(type_right, VectorType):
+                    if type_left.size != type_right.size:
+                        print(f"Error in line {node.line}. Different size of matrix")
+                        return Error()
+                    elif type_left.type != type_right.type:
+                        print(f"Error in line {node.line}. Different type of matrix")
+                        return Error()
+
+            return type
+        else:
+            print(f"Error in line {node.line}. Wrong type") # nwm czy nie prosciej print a w Error() dac pass
+            return Error()
 
     def visit_Cond(self, node):
         type_left = self.visit(node.left)
