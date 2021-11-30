@@ -1,9 +1,7 @@
 
 class Node(object):
-    lexer = None
-
     def __init__(self):
-        self.line = Node.lexer.lineno
+        self.line = None
 
 
 class Instructions(Node):
@@ -183,3 +181,4 @@ class Error(Node):
 class Empty(Node):
     def __init__(self):
         super().__init__()
+

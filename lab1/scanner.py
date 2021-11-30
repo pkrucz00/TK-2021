@@ -65,12 +65,12 @@ def t_STRING(t):
 
 def t_newline(t):
     r'\n+'
-    t.lexer.lineno += len(t.value)
+    t.get_lexer.lineno += len(t.value)
 
 
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
-    t.lexer.skip(1)
+    t.get_lexer.skip(1)
 
 
 def lexer():

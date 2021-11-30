@@ -3,7 +3,6 @@ import scanner
 import AST
 
 tokens = scanner.tokens
-AST.Node.lexer = scanner.lexer()
 
 start = 'program'
 precedence = (
@@ -196,6 +195,7 @@ def p_bin_expression(p):
                   | expression DOTMUL expression
                   | expression DOTDIV expression"""
     p[0] = AST.BinExpr(p[2], p[1], p[3])
+    p[0].line = p.lexer.lineno   # tę linię trzeba będzie powtórzyć przy każdej konstrukcji nowego elementu, w którym może się coś popsuć :c
 
 
 def p_expression(p):

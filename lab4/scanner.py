@@ -1,6 +1,5 @@
 import ply.lex as lex
 
-
 reserved = {
     'if': 'IF',
     'else': 'ELSE',
@@ -42,7 +41,6 @@ t_EQ = r'=='
 t_ignore = ' \t'
 t_ignore_COMMENT = r'\#.*'
 
-
 def t_ID(t):
     r'[a-zA-Z_]\w*'
     t.type = reserved.get(t.value, 'ID')
@@ -76,5 +74,5 @@ def t_error(t):
     t.lexer.skip(1)
 
 
-def lexer():
+def get_lexer():
     return lex.lex()

@@ -13,7 +13,7 @@ if __name__ == '__main__':
         sys.exit(0)
 
     text = file.read()
-    lexer = scanner.lexer()  # Changed to function call
+    lexer = scanner.get_lexer()  # Changed to function call
     lexer.input(text) # Give the lexer some input
 
     # Tokenize
