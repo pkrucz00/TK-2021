@@ -60,10 +60,14 @@ class NodeVisitor(object):
     #    for child in node.children:
     #        self.visit(child)
 
+
 class Error:
     def __init__(self, line_number, error_message):
         self.line_number = line_number
         self.error_message = error_message
+
+    def __str__(self):
+        return f'Line [{self.line_number}]: {self.error_message}'
 
 
 class TypeChecker(NodeVisitor):
@@ -75,9 +79,13 @@ class TypeChecker(NodeVisitor):
         self.symbol_table = SymbolTable(None, 'main')
         self.errors = []
 
+    def add_error(self, line, message):
+        new_error = Error(line, message)
+        self.errors.append(new_error)
+
     def print_errors(self):
         for error in self.errors:
-            print(f'Line [{error.line_number}]: {error.error_message}')
+            print(error)
 
     def visit_Instructions(self, node):
         self.init_visit()
@@ -90,24 +98,18 @@ class TypeChecker(NodeVisitor):
         type_right = self.visit(node.right)
         op = node.bin_op
 
-        if isinstance(type_left, Error) or isinstance(type_right, Error):
-            return Error()
-
         type = ttype[op][str(type_left)][str(type_right)]
         if type is not None:
             if type == 'vector':
                 if isinstance(type_left, VectorType) and isinstance(type_right, VectorType):
                     if type_left.size != type_right.size:
-                        print(f"Error in line {node.line}. Different size of matrix")
-                        return Error()
+                        self.add_error(node.line, "Different sizes of vectors in binary expression")
                     elif type_left.type != type_right.type:
-                        print(f"Error in line {node.line}. Different type of matrix")
-                        return Error()
-
+                        self.add_error(node.line, "Different types in binary expression")
             return type
         else:
-            print(f"Error in line {node.line}. Wrong type") # nwm czy nie prosciej print a w Error() dac pass
-            return Error()
+            self.add_error(node.line, "Wrong type")
+            return None
 
     def visit_Cond(self, node):
         type_left = self.visit(node.left)

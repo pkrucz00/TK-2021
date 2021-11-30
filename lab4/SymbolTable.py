@@ -8,6 +8,7 @@ class VariableSymbol(Symbol):
         self.name = name
         self.type = type
 
+
 class VectorType(Symbol):
     def __init__(self, size, type, dimension):
         self.size = size
@@ -16,6 +17,7 @@ class VectorType(Symbol):
 
     def __str__(self):
         return 'vector'
+
 
 class SymbolTable(object):
     def __init__(self, parent, name):  # parent scope and symbol table name
@@ -27,7 +29,7 @@ class SymbolTable(object):
         self.var_dict[name] = symbol
 
     def get(self, name):  # get variable symbol or fundef from <name> entry
-        return self.var_dict.get(name, default=self.__get_default_value())
+        return self.var_dict.get(name, default=self.__get_default_value(name))
 
     def __get_default_value(self, name):
         return self.getParentScope().get(name) if self.parent is not None else None

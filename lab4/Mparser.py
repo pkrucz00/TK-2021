@@ -1,7 +1,9 @@
 import ply.yacc as yacc
 import scanner
 import AST
+
 tokens = scanner.tokens
+AST.Node.lexer = scanner.lexer()
 
 start = 'program'
 precedence = (
@@ -68,6 +70,7 @@ def p_instruction(p):
 def p_instruction_if(p):
     """instruction : IF '(' condition ')' instruction %prec IFX """
     p[0] = AST.If(p[3], p[5])
+
 
 def p_instruction_if_else(p):
     """instruction : IF '(' condition ')' instruction ELSE instruction """
