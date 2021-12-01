@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from SymbolTable import SymbolTable, VectorType
+from SymbolTable import SymbolTable, VectorType, VariableSymbol
 import AST
 from collections import defaultdict
 
@@ -74,10 +74,12 @@ class TypeChecker(NodeVisitor):
     def __init__(self):
         self.symbol_table = SymbolTable(None, 'main')
         self.errors = None
+        self.loop_checker = 0
 
     def init_visit(self):
         self.symbol_table = SymbolTable(None, 'main')
         self.errors = []
+        self.loop_checker = 0
 
     def add_error(self, line, message):
         new_error = Error(line, message)
@@ -115,44 +117,77 @@ class TypeChecker(NodeVisitor):
         type_left = self.visit(node.left)
         type_right = self.visit(node.right)
         rel_op = node.rel_op
-        # type_checking
+        result_type = ttype[rel_op][str(type_left)][str(type_right)]
+        if result_type is not None:
+            return result_type
+        else:
+            self.add_error(node.line, "Wrong type")
+            return None
 
     def visit_AssignOperation(self, node):
         type_var = self.visit(node.variable)
         type_expr = self.visit(node.expression)
         op = node.op
-        # type_checking
-        # returning type
+        if op == '=':
+            self.symbol_table.put(node.variable.name, VariableSymbol(node.variable.name, type_expr))
+        else:
+            result_type = ttype[op][str(type_var)][str(type_expr)]
+            if result_type is not None:
+                if result_type == 'vector':
+                    if isinstance(type_var, VectorType) and isinstance(type_expr, VectorType):
+                        if type_var.size != type_expr.size:
+                            self.add_error(node.line, "Wrong size")
+                            return None
+                return result_type
+            else:
+                self.add_error(node.line, "Wrong type")
+                return None
 
     #Poniższe "Instrukcje blokowe" będą zapewne potrzebowały,
     # aby jakoś zaznaczyć, że w nie wchodzimy.
     # Inaczej trudno będzie sprawdzić, czy break i continue są dobrze użyte
     def visit_If(self, node):
         self.visit(node.condition)
+        self.symbol_table = self.symbol_table.pushScope('if')
         self.visit(node.instruction)
+        self.symbol_table = self.symbol_table.popScope()
+
 
     def visit_IfElse(self, node):
         self.visit(node.condition)
+        self.symbol_table = self.symbol_table.pushScope('if')
         self.visit(node.instruction)
-        self.visit(node.else_instruction)
+        self.symbol_table = self.symbol_table.popScope()
+        if node.else_instruction:
+            self.symbol_table.pushScope('else')
+            self.visit(node.else_instruction)
+            self.symbol_table.popScope()
 
     def visit_WhileLoop(self, node):
+        self.loop_checker += 1
+        self.symbol_table = self.symbol_table.pushScope('while')
         self.visit(node.condition)
         self.visit(node.instruction)
+        self.symbol_table = self.symbol_table.popScope()
+        self.loop_checker -= 1
+
 
     def visit_ForLoop(self, node):
-        self.visit(node.l_id)
-        #sprawdzenie, czy l_id nie jest już zajęte
-        self.visit(node.f_range)
-        self.instruction(node.instruction)
+        self.loop_checker += 1
+        self.symbol_table = self.symbol_table.pushScope('for')
+        type = self.visit(node.f_range)
+        self.symbol_table.put(node.l_id.name, VariableSymbol(node.l_id.name, type))
+        self.visit(node.instruction)
+        self.symbol_table = self.symbol_table.popScope()
+        self.loop_checker -= 1
 
     def visit_Break(self, node):
-        # check scope
-        pass
+        if self.loop_checker == 0:
+            self.add_error(node.line, "Break outside the loop")
 
     def visit_Continue(self, node):
-        # check scope
-        pass
+        if self.loop_checker == 0:
+            self.add_error(node.line, "Continue outside the loop")
 
     def visit_Return(self, node):
         return self.visit(node.val)
@@ -161,7 +196,7 @@ class TypeChecker(NodeVisitor):
     # nasz kompilator nie patrzy na typy drukowanych zmiennych.
     # Nie ma potrzeby zwracania typu, bo i jaki miałby on być.
     def visit_Print(self, node):
-        pass
+        self.visit(node.print_vars)
 
     #sprawdzanie, czy macierz jest kwadratowa zapewne też
     # powinno być jakoś zrobione z pomocą tablicy symboli
@@ -192,11 +227,22 @@ class TypeChecker(NodeVisitor):
     def visit_Range(self, node):
         type_start = self.visit(node.start)
         type_end = self.visit(node.end)
-        # type_check
+
+        if type_start != 'int':
+            self.add_error(node.line, "Error in type start")
+            return None
+        if type_end != 'int':
+            self.add_error(node.line, "Error in type end")
+            return None
+        return type_start
 
     def visit_MatrixFunction(self, node):
         type_value = self.visit(node.value)
-        # type_check
+        if type_value == 'int':
+            return VectorType([node.value, node.value], 'int', 2)
+        else:
+            self.add_error(node.line, "Wrong type in matrix function")
+            return None
 
     def visit_Transposition(self, node):
         type_matrix = self.visit(node.matrix)
@@ -224,5 +270,3 @@ class TypeChecker(NodeVisitor):
         #type_check
         # sprawdzenie, czy indeksy są poza zakresem
         # return self.symbol_table.do_something(node)      sprawdzenie typu w tablicy symboli
-
-
