@@ -29,7 +29,7 @@ class SymbolTable(object):
         self.var_dict[name] = symbol
 
     def get(self, name):  # get variable symbol or fundef from <name> entry
-        return self.var_dict.get(name, default=self.__get_default_value(name))
+        return self.var_dict.get(name, self.__get_default_value(name))
 
     def __get_default_value(self, name):
         return self.getParentScope().get(name) if self.parent is not None else None

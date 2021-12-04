@@ -209,6 +209,7 @@ def p_expression(p):
     """expression : num_expression
             | matrix
             | matrix_function
+            | vector
             | uminus
             | transposition
             | matrix_element
