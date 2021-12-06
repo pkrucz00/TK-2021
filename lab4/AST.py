@@ -1,7 +1,5 @@
 
 class Node(object):
-    def __init__(self):
-        self.type = None
     def accept(self, visitor):
         return visitor.visit(self)
 
