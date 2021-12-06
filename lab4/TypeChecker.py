@@ -69,11 +69,6 @@ class Error:
 
 
 class TypeChecker(NodeVisitor):
-    def __init__(self):
-        self.symbol_table = SymbolTable(None, 'main')
-        self.errors = None
-        self.loop_checker = 0
-
     def init_visit(self):
         self.symbol_table = SymbolTable(None, 'main')
         self.errors = []
@@ -86,6 +81,11 @@ class TypeChecker(NodeVisitor):
     def print_errors(self):
         for error in self.errors:
             print(error)
+
+    def visit_Num(self, node):
+        value = node.value
+        return "int" if isinstance(value, int) else "float"
+
 
     def visit_Instructions(self, node):
         self.init_visit()
@@ -123,13 +123,13 @@ class TypeChecker(NodeVisitor):
             return None
 
     def visit_AssignOperation(self, node):
-        type_var = self.visit(node.variable)
         type_expr = self.visit(node.expression)
         op = node.op
-
         if op == '=':
-            self.symbol_table.put(node.variable.id, VariableSymbol(node.variable.id, type_expr))   # w obiekcie VariableSymbol powtarzamy informację o nazwie zmiennej. Po co?
+            self.symbol_table.put(node.variable.id, type_expr)
+
         else:
+            type_var = self.visit(node.variable)
             result_type = ttype[op][str(type_var)][str(type_expr)]
             if result_type is not None:
                 if result_type == 'vector':
@@ -239,9 +239,6 @@ class TypeChecker(NodeVisitor):
     def visit_PrintVals(self, node):
         self.visit(node.vals)
 
-    def visit_Num(self, node):
-        value = node.value
-        return "int" if isinstance(value, int) else "float"
 
     def visit_String(self, node):
         return "string"
