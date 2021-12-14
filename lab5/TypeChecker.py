@@ -90,12 +90,14 @@ class TypeChecker(NodeVisitor):
         value = node.value
         return "int" if isinstance(value, int) else "float"
 
+    def visit_Program(self, node):
+        self.init_visit()
+        self.visit(node.instructions)
+        self.print_errors()
 
     def visit_Instructions(self, node):
-        self.init_visit()
         for instruction in node.instructions:
             self.visit(instruction)
-        self.print_errors()
 
     def visit_BinExpr(self, node):
         type_left = self.visit(node.left)
@@ -143,7 +145,7 @@ class TypeChecker(NodeVisitor):
                             return None
                 return result_type
             else:
-                self.add_error(node.line, "Wrong type in assign operation")
+                self.add_error(node.expression.line, "Wrong type in assign operation")
                 return None
 
     def visit_If(self, node):
@@ -174,7 +176,7 @@ class TypeChecker(NodeVisitor):
         self.loop_checker += 1
         self.symbol_table = self.symbol_table.pushScope('for')
         type = self.visit(node.f_range)
-        self.symbol_table.put(node.l_id.name, VariableSymbol(node.l_id.name, type))
+        self.symbol_table.put(node.l_id.id, type)
         self.visit(node.instruction)
         self.symbol_table = self.symbol_table.popScope()
         self.loop_checker -= 1

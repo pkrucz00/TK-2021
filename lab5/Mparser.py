@@ -32,17 +32,12 @@ def p_empty(p):
 
 
 def p_program(p):
-    """program : instructions_opt"""
-    p[0] = p[1]
+    """program : instructions"""
+    p[0] = AST.Program(p[1])
 
 
-def p_instructions_opt_1(p):
-    """instructions_opt : instructions """
-    p[0] = p[1]
-
-
-def p_instructions_opt_2(p):
-    """instructions_opt : empty"""
+def p_empty_program(p):
+    """program : empty"""
     p[0] = p[1]
 
 
@@ -81,11 +76,11 @@ def p_instruction_while(p):
 
 def p_instruction_for(p):
     """instruction : FOR var '=' range instruction """
-    p[0] = AST.ForLoop(p[2], p[4], p[5], p.lineno(1))
+    p[0] = AST.ForLoop(p[2], p[4], p[5])
 
 def p_range(p):
     """range : expression ':' expression """
-    p[0] = AST.Range(p[1], p[3])
+    p[0] = AST.Range(p[1], p[3], p.lineno(1))
 
 def p_condition(p):
     """condition : expression EQ expression
@@ -203,6 +198,11 @@ def p_expression(p):
             | matrix_element
             | vector_element """
     p[0] = p[1]
+
+
+def p_nested_expression(p):
+    """expression : "(" expression ")" """
+    p[0] = p[2]
 
 
 def p_num_expression(p):

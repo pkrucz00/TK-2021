@@ -6,6 +6,11 @@ class Node(object):
         return visitor.visit(self)
 
 
+class Program(Node):
+    def __init__(self, instructions):
+        super().__init__()
+        self.instructions = instructions
+
 class Instructions(Node):
     def __init__(self, new_instruction, instructions=None):
         super().__init__()

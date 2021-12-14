@@ -1,7 +1,7 @@
 import AST
 import SymbolTable
 from Memory import *
-from Exceptions import  *
+from Exceptions import *
 from visit import *
 import sys
 import numpy as np
@@ -58,11 +58,14 @@ class Interpreter(object):
     def visit(self, node):
         pass
 
+    @when(AST.Program)
+    def visit(self, node):
+        node.instructions.accept(self)
+
     @when(AST.Instructions)
     def visit(self, node):
         for instruction in node.instructions:
             instruction.accept(self)
-
 
     @when(AST.Num)
     def visit(self, node):
@@ -117,13 +120,13 @@ class Interpreter(object):
 
     @when(AST.Transposition)
     def visit(self, node):
-        matrix = self.matrix.accept(self)
+        matrix = node.matrix.accept(self)
         return np.transpose(matrix)
 
     @when(AST.If)
     def visit(self, node):
         if node.condition.accept(self):
-            self.mamoryStack.push(Memory("if"))
+            self.memoryStack.push(Memory("if"))
             r = node.instruction.accept(self)
             self.memoryStack.pop()
             return r
@@ -146,10 +149,13 @@ class Interpreter(object):
         r1 = node.left.accept(self)
         r2 = node.right.accept(self)
         op = node.bin_op
-        if isinstance(r1, AST.Num) and isinstance(r2, AST.Num):
+        if self.is_num(r1) and self.is_num(r2):
             return binOps[op](r1, r2)
         else:
             return binOpsMatrix[op](r1, r2)
+
+    def is_num(self, val):
+        return isinstance(val, int) or isinstance(val, float)
 
     @when(AST.AssignOperation)
     def visit(self, node):
@@ -160,10 +166,17 @@ class Interpreter(object):
             self.memoryStack.insert(left_side_name, right_side)
         elif op in assignOps:
             left_side_value = self.memoryStack.get(left_side_name)
-            # if isinstance(right_side, AST.Vector) or isinstance(right_side, AST.Matrix):
-            new_value = assignOpsMatrix[op](left_side_value, right_side)
+
+            new_value = assignOpsMatrix[op](left_side_value, right_side) \
+                if self.is_multidimentional(right_side) \
+                else assignOps[op](left_side_value, right_side)
+
             self.memoryStack.set(left_side_name, new_value)
+
     #
+
+    def is_multidimentional(self, obj):
+        return isinstance(obj, AST.Vector) or isinstance(obj, AST.Matrix)
 
     @when(AST.ID)
     def visit(self, node):
@@ -173,10 +186,29 @@ class Interpreter(object):
     # simplistic while loop interpretation
     @when(AST.WhileLoop)
     def visit(self, node):
-        r = None
-        while node.cond.accept(self):
-            r = node.body.accept(self)
-        return r
+        self.memoryStack.push(Memory("while"))
+
+        while node.condition.accept(self):
+            node.instruction.accept(self)
+
+        self.memoryStack.pop()
+
+    @when(AST.ForLoop)
+    def visit(self, node):
+        self.memoryStack.push(Memory("for"))
+        loop_range = node.f_range.accept(self)
+        self.memoryStack.insert(node.l_id.id, None)
+        for iter in loop_range:
+            self.memoryStack.set(node.l_id.id, iter)
+            node.instruction.accept(self)
+
+        self.memoryStack.pop()
+
+    @when(AST.Range)
+    def visit(self, node):
+        start_val = node.start.accept(self)
+        end_val = node.end.accept(self)
+        return range(start_val, end_val + 1)
 
     @when(AST.Print)
     def visit(self, node):
@@ -184,8 +216,4 @@ class Interpreter(object):
 
     @when(AST.PrintVals)
     def visit(self, node):
-        return "".join([str(print_val.accept(self)) for print_val in node.vals])
-
-
-
-
+        return " ".join([str(print_val.accept(self)) for print_val in node.vals])

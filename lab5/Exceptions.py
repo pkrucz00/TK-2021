@@ -10,3 +10,8 @@ class BreakException(Exception):
 
 class ContinueException(Exception):
     pass
+
+
+class VariableNotInitializedException(Exception):
+    def __init__(self, name):
+        self.name = name

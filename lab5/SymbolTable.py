@@ -20,10 +20,10 @@ class VectorType(Symbol):
 
 
 class SymbolTable(object):
-    def __init__(self, parent, name):  # parent scope and symbol table name
+    def __init__(self, parent, name, var_dict=None):  # parent scope and symbol table name
         self.parent = parent
         self.name = name
-        self.var_dict = {}
+        self.var_dict = var_dict if var_dict else {}
 
     def put(self, name, symbol):  # put variable symbol or fundef under <name> entry
         self.var_dict[name] = symbol
@@ -39,7 +39,7 @@ class SymbolTable(object):
     #
 
     def pushScope(self, name):
-        return SymbolTable(self, name)
+        return SymbolTable(self, name, self.var_dict)
     #
 
     def popScope(self):

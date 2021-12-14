@@ -1,3 +1,5 @@
+from Exceptions import *
+
 class Memory:
     def __init__(self, name):  # memory name
         self.name = name
@@ -22,7 +24,8 @@ class MemoryStack:
         for memory in reversed(self.stack):
             if memory.has_key(name):
                 return memory.get(name)
-        return None
+
+        raise VariableNotInitializedException(name)
 
     def insert(self, name, value):  # inserts into memory stack variable <name> with value <value>
         self.stack[-1].put(name, value)
@@ -31,6 +34,8 @@ class MemoryStack:
         for memory in self.stack:
             if memory.has_key(name):
                 memory.put(name, value)
+                return
+        raise VariableNotInitializedException(name)
       # nie wiem co w przypadku gdy nie ma... inicjalizowac? czy ignorowac, bo mogl to byc blad?
 
     def push(self, memory):  # pushes memory <memory> onto the stack
