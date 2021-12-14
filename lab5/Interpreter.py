@@ -4,7 +4,7 @@ from Memory import *
 from Exceptions import  *
 from visit import *
 import sys
-import numpy
+import numpy as np
 
 sys.setrecursionlimit(10000)
 
@@ -16,15 +16,14 @@ binOps = {
 }
 
 binOpsMatrix = {
-    ".+": (lambda x, y: numpy.add(x, y)),
-    ".-": (lambda x, y: numpy.subtract(x, y)),
-    ".*": (lambda x, y: numpy.multiply(x, y)),
-    "./": (lambda x, y: numpy.divide(x, y)),
-    "+": (lambda x, y: numpy.matrix(x) + numpy.matrix(y)),
-    "-": (lambda x, y: numpy.matrix(x) - numpy.matrix(y)),
-    "*": (lambda x, y: numpy.matrix(x) * numpy.matrix(y)),
-    "/": (lambda x, y: numpy.matrix(x) / numpy.matrix(y)),
-
+    ".+": (lambda x, y: x + y),
+    ".-": (lambda x, y: x - y),
+    ".*": (lambda x, y: x * y),
+    "./": (lambda x, y: x / y),
+    "+": (lambda x, y: x + y),
+    "-": (lambda x, y: x - y),
+    "*": (lambda x, y: np.dot(x, y)),
+    "/": (lambda x, y: np.linalg.solve(y, x)),
 }
 
 compOps = {
@@ -37,17 +36,17 @@ compOps = {
 }
 
 assignOps = {
-    "+=": (lambda x, y: x + y),
-    "-=": (lambda x, y: x - y),
-    "*=": (lambda x, y: x * y),
-    "/*": (lambda x, y: x / y),
+    "+=": binOps["+"],
+    "-=": binOps["-"],
+    "*=": binOps["*"],
+    "/*": binOps["/"],
 }
 
 assignOpsMatrix = {
-    "+=": (lambda x, y: numpy.matrix(x) + numpy.matrix(y)),
-    "-=": (lambda x, y: numpy.matrix(x) - numpy.matrix(y)),
-    "*=": (lambda x, y: numpy.matrix(x) * numpy.matrix(y)),
-    "/=": (lambda x, y: numpy.matrix(x) / numpy.matrix(y)),
+    "+=": binOpsMatrix["+"],
+    "-=": binOpsMatrix["-"],
+    "*=": binOpsMatrix["*"],
+    "/=": binOpsMatrix["/"],
 }
 
 
@@ -58,6 +57,12 @@ class Interpreter(object):
     @on('node')
     def visit(self, node):
         pass
+
+    @when(AST.Instructions)
+    def visit(self, node):
+        for instruction in node.instructions:
+            instruction.accept(self)
+
 
     @when(AST.Num)
     def visit(self, node):
@@ -95,25 +100,25 @@ class Interpreter(object):
 
     @when(AST.Vector)
     def visit(self, node):
-        return [elem.accept(self) for elem in node.vector]
+        return np.array([elem.accept(self) for elem in node.vector])
 
     @when(AST.Matrix)
     def visit(self, node):
-        return [[elem.accept(self) for elem in vector] for vector in node.matrix]
+        return np.array([vector.accept(self) for vector in node.matrix])
 
     @when(AST.MatrixFunction)
     def visit(self, node):
         if node.func == "eye":
-            return numpy.eye(node.value)
+            return np.eye(node.value)
         elif node.func == "ones":
-            return numpy.ones(node.value)
+            return np.ones(node.value)
         else:
-            return numpy.zeros(node.value)
+            return np.zeros(node.value)
 
     @when(AST.Transposition)
     def visit(self, node):
         matrix = self.matrix.accept(self)
-        return numpy.transpose(matrix)
+        return np.transpose(matrix)
 
     @when(AST.If)
     def visit(self, node):
@@ -136,26 +141,51 @@ class Interpreter(object):
             self.memoryStack.pop()
             return r
 
-    @when(AST.BinOp)
+    @when(AST.BinExpr)
     def visit(self, node):
         r1 = node.left.accept(self)
         r2 = node.right.accept(self)
-        # try sth smarter than:
-        # if(node.op=='+') return r1+r2
-        # elsif(node.op=='-') ...
-        # but do not use python eval
+        op = node.bin_op
+        if isinstance(r1, AST.Num) and isinstance(r2, AST.Num):
+            return binOps[op](r1, r2)
+        else:
+            return binOpsMatrix[op](r1, r2)
 
-    @when(AST.Assignment)
+    @when(AST.AssignOperation)
     def visit(self, node):
-        pass
+        left_side_name = node.variable.id
+        right_side = node.expression.accept(self)
+        op = node.op
+        if op == "=":
+            self.memoryStack.insert(left_side_name, right_side)
+        elif op in assignOps:
+            left_side_value = self.memoryStack.get(left_side_name)
+            # if isinstance(right_side, AST.Vector) or isinstance(right_side, AST.Matrix):
+            new_value = assignOpsMatrix[op](left_side_value, right_side)
+            self.memoryStack.set(left_side_name, new_value)
     #
-    #
+
+    @when(AST.ID)
+    def visit(self, node):
+        var_name = node.id
+        return self.memoryStack.get(var_name)
 
     # simplistic while loop interpretation
-    @when(AST.WhileInstr)
+    @when(AST.WhileLoop)
     def visit(self, node):
         r = None
         while node.cond.accept(self):
             r = node.body.accept(self)
         return r
+
+    @when(AST.Print)
+    def visit(self, node):
+        print(node.print_vars.accept(self))
+
+    @when(AST.PrintVals)
+    def visit(self, node):
+        return "".join([str(print_val.accept(self)) for print_val in node.vals])
+
+
+
 

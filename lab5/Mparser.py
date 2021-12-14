@@ -94,7 +94,7 @@ def p_condition(p):
                  | expression GE expression
                  | expression '<' expression
                  | expression '>' expression """
-    p[0] = AST.Cond(p[2], p[1], p[3])
+    p[0] = AST.Cond(p[2], p[1], p[3], p.lineno(1))
 
 def p_assignment_op(p):
     """assignment_op : MULASSIGN
