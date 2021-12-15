@@ -25,7 +25,7 @@ class MemoryStack:
             if memory.has_key(name):
                 return memory.get(name)
 
-        raise VariableNotInitializedException(name)
+        return None
 
     def insert(self, name, value):  # inserts into memory stack variable <name> with value <value>
         self.stack[-1].put(name, value)

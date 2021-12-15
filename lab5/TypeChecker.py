@@ -304,18 +304,18 @@ class TypeChecker(NodeVisitor):
 
         variable_symbol = self.symbol_table.get(node.id)
         vector_type = variable_symbol
-        if vector_type is None or not isinstance(vector_type, VectorType):
+        if vector_type is None or not isinstance(variable_symbol, VectorType):
             self.add_error(node.line, f"Vector {node.id} uninitialized or of wrong type")
             return None
 
-        if vector_type.dimension != 1:
+        if variable_symbol.dimension != 1:
             self.add_error(node.line, "Wrong dimension for vector element")
             return None
-        elif not (0 <= index < vector_type.size):
+        elif not (0 <= index < variable_symbol.size):
             self.add_error(node.line, "Index out of bounds")
             return None
 
-        return vector_type.type
+        return variable_symbol.type
 
     def visit_MatrixElement(self, node):
         x, y = node.index_x, node.index_y
@@ -325,18 +325,18 @@ class TypeChecker(NodeVisitor):
 
         variable_symbol = self.visit(node.id)
         matrix_type = variable_symbol.type
-        if matrix_type is None or not isinstance(matrix_type, VectorType):
+        if matrix_type is None or not isinstance(variable_symbol, VectorType):
             self.add_error(node.line, f"Vector {node.id.id} uninitialized or of wrong type")
             return None
 
-        if matrix_type.dimension != 2:
+        if variable_symbol.dimension != 2:
             self.add_error(node.line, "Wrong dimension for a matrix element")
             return None
 
-        max_x, max_y = matrix_type.size[0], matrix_type.size[1]
+        max_x, max_y = variable_symbol.size[0], variable_symbol.size[1]
         are_x_and_y_in_bounds = 0 <= x < max_x and 0 <= y < max_y
         if not are_x_and_y_in_bounds:
             self.add_error(node.line, "Index out of bounds")
             return None
 
-        return matrix_type.type
+        return matrix_type

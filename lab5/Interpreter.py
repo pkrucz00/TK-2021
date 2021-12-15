@@ -116,7 +116,7 @@ class Interpreter(object):
         elif node.func == "ones":
             return np.ones(node.value)
         else:
-            return np.zeros(node.value)
+            return np.zeros((node.value, node.value))
 
     @when(AST.Transposition)
     def visit(self, node):
@@ -159,29 +159,80 @@ class Interpreter(object):
 
     @when(AST.AssignOperation)
     def visit(self, node):
-        left_side_name = node.variable.id
-        right_side = node.expression.accept(self)
+        var = node.variable
+        expression_val = node.expression.accept(self)
         op = node.op
+        if isinstance(var, AST.MatrixElement):
+            self.assign_matrix_element(var, expression_val, op)
+        elif isinstance(var, AST.VectorElement):
+            self.assign_vector_element(var, expression_val, op)
+        else:
+            self.assign_variable(var.id, expression_val, op)
+
+    def assign_matrix_element(self, matrix_elem_node, expression_val, op):
+        matrix_id, x, y = matrix_elem_node.id.id, matrix_elem_node.index_x, matrix_elem_node.index_y
+        matrix = self.memoryStack.get(matrix_id)
+        if self.check_matrix_and_value_type(matrix[x][y], expression_val):
+            raise AssignmentException()
+
         if op == "=":
-            self.memoryStack.insert(left_side_name, right_side)
-        elif op in assignOps:
-            left_side_value = self.memoryStack.get(left_side_name)
+            matrix[x][y] = expression_val
+        else:
+            curr_value = matrix_elem_node.accept(self)
+            new_value = assignOps[op](curr_value, expression_val)
+            matrix[x][y] = new_value
 
-            new_value = assignOpsMatrix[op](left_side_value, right_side) \
-                if self.is_multidimentional(right_side) \
-                else assignOps[op](left_side_value, right_side)
+    def assign_vector_element(self, vector_elem_node, expression_val, op):
+        vector_id, x = vector_elem_node.id, vector_elem_node.index
+        vector = self.memoryStack.get(vector_id)
+        if self.check_matrix_and_value_type(vector[x], expression_val):
+            raise AssignmentException()
 
-            self.memoryStack.set(left_side_name, new_value)
+        if op == "=":
+            vector[x] = expression_val
+        else:
+            curr_value = vector_elem_node.accept(self)
+            new_value = assignOps[op](curr_value, expression_val)
+            vector[x] = new_value
 
-    #
+    def assign_variable(self, id, expression_value, op):
+        if op == "=":
+            if self.memoryStack.get(id) is not None:
+                self.memoryStack.set(id, expression_value)
+            else:
+                self.memoryStack.insert(id, expression_value)
+        else:
+            curr_value = self.memoryStack.get(id)
+            new_value = assignOps[op](curr_value, expression_value) \
+                    if self.is_multidimentional(expression_value) \
+                    else assignOps[op](curr_value, expression_value)
+            self.memoryStack.set(id, new_value)
+
 
     def is_multidimentional(self, obj):
-        return isinstance(obj, AST.Vector) or isinstance(obj, AST.Matrix)
+        return isinstance(obj, np.ndarray)
+
+
+    def check_matrix_and_value_type(self, matrix_elem, value):
+        return type(matrix_elem) == type(value)   # zakładamy, że w macierzy znajdują się dobre wartości
 
     @when(AST.ID)
     def visit(self, node):
         var_name = node.id
         return self.memoryStack.get(var_name)
+
+    @when(AST.VectorElement)
+    def visit(self, node):
+        vector = node.id.accept(self)
+        index = node.index.accept(self)
+        return vector[index]
+
+    @when(AST.MatrixElement)
+    def visit(self, node):
+        matrix = node.id.accept(self)
+        x = node.index_x
+        y = node.index_y
+        return matrix[x, y]
 
     # simplistic while loop interpretation
     @when(AST.WhileLoop)

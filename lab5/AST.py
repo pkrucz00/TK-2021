@@ -11,6 +11,7 @@ class Program(Node):
         super().__init__()
         self.instructions = instructions
 
+
 class Instructions(Node):
     def __init__(self, new_instruction, instructions=None):
         super().__init__()
