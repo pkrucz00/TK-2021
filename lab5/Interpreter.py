@@ -26,6 +26,10 @@ binOpsMatrix = {
     "/": (lambda x, y: np.linalg.solve(y, x)),
 }
 
+binOpsString = {
+    "*": (lambda x, y: x * y)
+}
+
 compOps = {
     ">": (lambda x, y: x > y),
     "<": (lambda x, y: x < y),
@@ -149,13 +153,20 @@ class Interpreter(object):
         r1 = node.left.accept(self)
         r2 = node.right.accept(self)
         op = node.bin_op
-        if self.is_num(r1) and self.is_num(r2):
+        if self.is_string(r1) or self.is_string(r2) and op in binOpsString:
+            return binOpsString[op](r1, r2)
+        elif self.is_num(r1) and self.is_num(r2) and op in binOps:
             return binOps[op](r1, r2)
-        else:
+        elif self.is_multidimentional(r1) or self.is_multidimentional(r2) and op in binOpsMatrix:
             return binOpsMatrix[op](r1, r2)
+        else:
+            raise BinaryOperationException(f"Could not find fitting binary operation for {r1} {op} {r2}")
 
     def is_num(self, val):
         return isinstance(val, int) or isinstance(val, float)
+
+    def is_string(self, val):
+        return isinstance(val, str)
 
     @when(AST.AssignOperation)
     def visit(self, node):

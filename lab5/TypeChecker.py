@@ -32,6 +32,8 @@ ttype['-']['vector'][None] = 'vector'
 ttype['-']['int'][None] = 'int'
 ttype['-']['float'][None] = 'float'
 ttype['+']['string']['string'] = 'string'
+ttype['*']['string']['int'] = 'string'
+ttype['*']['int']['string'] = 'string'
 
 
 class NodeVisitor(object):

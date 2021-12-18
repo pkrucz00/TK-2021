@@ -132,7 +132,7 @@ class Num(Node):
 class String(Node):
     def __init__(self, value):
         super().__init__()
-        self.value = value
+        self.value = value[1:-1]   #getting rid of the quotes
 
 
 class Variable(Node):

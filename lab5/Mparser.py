@@ -207,9 +207,9 @@ def p_nested_expression(p):
 
 def p_num_expression(p):
     """num_expression : number
+                      | string
                       | var """
     p[0] = p[1]
-
 
 def p_var(p):
     """ var : ID """
@@ -256,8 +256,7 @@ def p_print_vals(p):
 
 
 def p_print_val(p):
-    """print_val : string
-                 | expression"""
+    """print_val : expression"""
     p[0] = p[1]
 
 

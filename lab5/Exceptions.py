@@ -18,3 +18,6 @@ class VariableNotInitializedException(Exception):
 
 class AssignmentException(Exception):
     pass
+
+class BinaryOperationException(Exception):
+    pass
