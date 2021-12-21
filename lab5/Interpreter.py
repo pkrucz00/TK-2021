@@ -174,6 +174,7 @@ class Interpreter(object):
         var = node.variable
         expression_val = node.expression.accept(self)
         op = node.op
+
         if isinstance(var, AST.MatrixElement):
             self.assign_matrix_element(var, expression_val, op)
         elif isinstance(var, AST.VectorElement):
@@ -216,17 +217,15 @@ class Interpreter(object):
         else:
             curr_value = self.memoryStack.get(id)
             new_value = assignOps[op](curr_value, expression_value) \
-                    if self.is_multidimentional(expression_value) \
-                    else assignOps[op](curr_value, expression_value)
+                if self.is_multidimentional(expression_value) \
+                else assignOps[op](curr_value, expression_value)
             self.memoryStack.set(id, new_value)
-
 
     def is_multidimentional(self, obj):
         return isinstance(obj, np.ndarray)
 
-
     def check_matrix_and_value_type(self, matrix_elem, value):
-        return type(matrix_elem) == type(value)   # zakładamy, że w macierzy znajdują się dobre wartości
+        return type(matrix_elem) == type(value)  # zakładamy, że w macierzy znajdują się dobre wartości
 
     @when(AST.ID)
     def visit(self, node):
@@ -249,23 +248,39 @@ class Interpreter(object):
     # simplistic while loop interpretation
     @when(AST.WhileLoop)
     def visit(self, node):
-        self.memoryStack.push(Memory("while"))
-
         while node.condition.accept(self):
-            node.instruction.accept(self)
+            try:
+                self.memoryStack.push(Memory("while"))
+                node.instruction.accept(self)
+            except ContinueException:
+                pass
+            except BreakException:
+                break
+            finally:
+                self.memoryStack.pop()
 
-        self.memoryStack.pop()
 
     @when(AST.ForLoop)
     def visit(self, node):
-        self.memoryStack.push(Memory("for"))
         loop_range = node.f_range.accept(self)
-        self.memoryStack.insert(node.l_id.id, None)
-        for iter in loop_range:
-            self.memoryStack.set(node.l_id.id, iter)
-            node.instruction.accept(self)
+        if self.memoryStack.get(node.l_id.id):
+            self.memoryStack.set(node.l_id.id, loop_range.start)
+        else:
+            self.memoryStack.insert(node.l_id.id, loop_range.start)
 
-        self.memoryStack.pop()
+        while self.memoryStack.get(node.l_id.id) <= (len(loop_range) + loop_range.start - 1):
+            try:
+                self.memoryStack.push(Memory("for"))
+                node.instruction.accept(self)
+            except ContinueException:
+                pass
+            except BreakException:
+                pass
+            finally:
+                self.memoryStack.pop()
+
+            new = self.memoryStack.get(node.l_id.id) + 1
+            self.memoryStack.set(node.l_id.id, new)
 
     @when(AST.Range)
     def visit(self, node):
